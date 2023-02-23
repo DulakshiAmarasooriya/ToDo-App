@@ -1,6 +1,7 @@
 import '../model/todo.dart';
 
 import '../widgets/todo_item.dart';
+import '../constants/colors.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -16,14 +17,20 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final todoList = ToDo.todoList();
+  List<ToDo> _foundToDo = [];
   final _todoController = TextEditingController();
+
+  void initState() {
+    _foundToDo = todoList;
+    super.initState();
+  }
 
   get todoo => null;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: tdBGColor,
+      backgroundColor: tdBColor,
       appBar: _buildAppBAr(),
       body: Stack(
         children: [
@@ -42,7 +49,7 @@ class _HomeState extends State<Home> {
                             fontSize: 30, fontWeight: FontWeight.w500),
                       ),
                     ),
-                    for (ToDo toDo in todoList)
+                    for (ToDo todoo in _foundToDo.reversed)
                       ToDoItem(
                         todo: todoo,
                         onToDoChanged: _handleToDoChange,
@@ -73,6 +80,7 @@ class _HomeState extends State<Home> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: TextField(
+                    controller: _todoController,
                     decoration: InputDecoration(
                       hintText: 'Add a new todo item',
                       border: InputBorder.none,
@@ -89,9 +97,11 @@ class _HomeState extends State<Home> {
                       fontSize: 40,
                     ),
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    _addToDoItem(_todoController.text);
+                  },
                   style: ElevatedButton.styleFrom(
-                    // primary: tdBlue,
+                    primary: tdBlue,
                     minimumSize: Size(60, 60),
                     elevation: 10,
                   ),
@@ -116,6 +126,31 @@ class _HomeState extends State<Home> {
     });
   }
 
+  void _addToDoItem(String toDo) {
+    setState(() {
+      todoList.add(ToDo(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          todoText: toDo));
+    });
+    _todoController.clear();
+  }
+
+  void _runFilter(String enterKeyword) {
+    List<ToDo> results = [];
+    if (enterKeyword.isEmpty) {
+      results = todoList;
+    } else {
+      results = todoList
+          .where((item) =>
+              item.todoText!.toLowerCase().contains(enterKeyword.toLowerCase()))
+          .toList();
+    }
+
+    setState(() {
+      _foundToDo = results;
+    });
+  }
+
   Widget searchBox() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 15),
@@ -124,19 +159,20 @@ class _HomeState extends State<Home> {
         borderRadius: BorderRadius.circular(20),
       ),
       child: TextField(
+        onChanged: (value) => _runFilter(value),
         decoration: InputDecoration(
           contentPadding: EdgeInsets.all(0),
           prefixIcon: Icon(
             Icons.search,
-            // color: tdBlack,
+            color: tdBlack,
             size: 20,
           ),
           prefixIconConstraints: BoxConstraints(maxHeight: 20, minWidth: 25),
           border: InputBorder.none,
           hintText: "Serach",
           hintStyle: TextStyle(
-              // color: tdGrey,
-              ),
+            color: tdGrey,
+          ),
         ),
       ),
     );
@@ -149,7 +185,7 @@ class _HomeState extends State<Home> {
       title: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         Icon(
           Icons.menu,
-          // color: tdBlack,
+          color: tdBlack,
           size: 30,
         ),
         Container(
@@ -157,7 +193,7 @@ class _HomeState extends State<Home> {
           width: 40,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(20),
-            child: Image.asset('assts/Avatar.JPG'),
+            child: Image.asset('assests/images/Avatar.JPG'),
           ),
         ),
       ]),
